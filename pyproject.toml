@@ -1,0 +1,15 @@
+[project]
+name = "ComfyUI-omnivoice-tts"
+description = "ComfyUI custom nodes for OmniVoice TTS | voice clone, multi-speaker, voice design, text-to-speech"
+version = "0.4.2"
+license = {file = "LICENSE"}
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/Saganaki22/ComfyUI-OmniVoice-TTS"
+
+[tool.comfy]
+PublisherId = "saganaki22"
+DisplayName = "OmniVoice TTS"
+Icon = "https://avatars.githubusercontent.com/u/84208527"
+PreInstall = "install.py"
