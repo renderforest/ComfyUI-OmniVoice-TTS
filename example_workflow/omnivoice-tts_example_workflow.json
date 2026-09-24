@@ -1,0 +1,795 @@
+{
+  "id": "c238ce19-d517-44ba-b91d-7b1ff93a715d",
+  "revision": 0,
+  "last_node_id": 30,
+  "last_link_id": 44,
+  "nodes": [
+    {
+      "id": 11,
+      "type": "OmniVoiceWhisperLoader",
+      "pos": [
+        1521.2780296119986,
+        2987.007714856894
+      ],
+      "size": [
+        280.4712890625,
+        106
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "whisper_model",
+          "type": "WHISPER_ASR",
+          "links": [
+            34
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-omnivoice-tts",
+        "ver": "0.1.1",
+        "Node name for S&R": "OmniVoiceWhisperLoader",
+        "aux_id": "Saganaki22/ComfyUI-OmniVoice-TTS"
+      },
+      "widgets_values": [
+        "whisper-large-v3-turbo (auto-download)",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "OmniVoiceWhisperLoader",
+      "pos": [
+        728.681811318653,
+        2953.3926656810477
+      ],
+      "size": [
+        280.4712890625,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "whisper_model",
+          "type": "WHISPER_ASR",
+          "links": [
+            39
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-omnivoice-tts",
+        "ver": "0.1.1",
+        "Node name for S&R": "OmniVoiceWhisperLoader",
+        "aux_id": "Saganaki22/ComfyUI-OmniVoice-TTS"
+      },
+      "widgets_values": [
+        "whisper-large-v3-turbo (auto-download)",
+        "auto",
+        "fp16"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "LoadAudio",
+      "pos": [
+        726.99744314663,
+        2746.773408956822
+      ],
+      "size": [
+        282.798828125,
+        136
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            38
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "sample-4.mp3",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 5,
+      "type": "LoadAudio",
+      "pos": [
+        1518.7914663102342,
+        2759.0060247975953
+      ],
+      "size": [
+        282.798828125,
+        136
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            33
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "sample-5.mp3",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 29,
+      "type": "OmniVoiceMultiSpeakerTTS",
+      "pos": [
+        1857.6212648959554,
+        3785.3390554966636
+      ],
+      "size": [
+        400,
+        612
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "speaker_1_audio",
+          "name": "num_speakers.speaker_1_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 41
+        },
+        {
+          "label": "speaker_2_audio",
+          "name": "num_speakers.speaker_2_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            43
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-omnivoice-tts",
+        "ver": "bbc483ee74d0222fa8bd8bb35b41fd407806bce1",
+        "Node name for S&R": "OmniVoiceMultiSpeakerTTS"
+      },
+      "widgets_values": [
+        "OmniVoice",
+        "[Speaker_1]: Hello, I'm speaker one.\n[Speaker_2]: And I'm speaker two!",
+        32,
+        2,
+        0.1,
+        1,
+        0.3,
+        "auto",
+        "auto",
+        "auto",
+        5,
+        0,
+        5,
+        true,
+        true,
+        true,
+        0,
+        "randomize",
+        true,
+        "2",
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 28,
+      "type": "OmniVoiceVoiceCloneTTS",
+      "pos": [
+        1038.0301392993795,
+        2748.8663688968895
+      ],
+      "size": [
+        412.8060414724964,
+        726.631665558878
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ref_audio",
+          "type": "AUDIO",
+          "link": 38
+        },
+        {
+          "name": "whisper_model",
+          "shape": 7,
+          "type": "WHISPER_ASR",
+          "link": 39
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            40
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-omnivoice-tts",
+        "ver": "bbc483ee74d0222fa8bd8bb35b41fd407806bce1",
+        "Node name for S&R": "OmniVoiceVoiceCloneTTS"
+      },
+      "widgets_values": [
+        "OmniVoice (auto download)",
+        "Good morning everyone,\n\nToday, I want to talk about something simple, yet powerful: progress. Not perfection, not overnight success, but progress—the small steps we take every single day that shape who we become.\n\nWe often live in a world that celebrates big achievements. We see the end results: the awards, the promotions, the victories. But what we don’t always see are the countless hours of effort, the failures, and the moments of doubt that came before them. Progress lives in those unseen moments.\n\nThink about it. Every skill you have today started with a first attempt. Maybe it wasn’t good. Maybe it was uncomfortable. But you kept going. That’s progress.\n\nThe truth is, you don’t need to have everything figured out to move forward. You just need to start. One step. One decision. One action. Over time, those small steps build momentum, and momentum creates change.\n\nThere will be days when progress feels slow. Days when you question whether it’s worth it. In those moments, remember this: growth is not always visible, but it is always happening when you keep trying.\n\nSo don’t be discouraged by how far you have to go. Instead, focus on how far you’ve already come. Celebrate the small wins. Learn from the setbacks. And most importantly, keep moving forward.\n\nBecause in the end, success is not about being perfect. It’s about being persistent.\n\nThank you.",
+        "",
+        32,
+        2,
+        0.1,
+        1,
+        0,
+        "auto",
+        "auto",
+        "auto",
+        465796411,
+        "randomize",
+        5,
+        0,
+        5,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "id": 26,
+      "type": "OmniVoiceLongformTTS",
+      "pos": [
+        1844.100478261408,
+        2758.8121811160304
+      ],
+      "size": [
+        415.29591883116564,
+        693.6868872408199
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ref_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 33
+        },
+        {
+          "name": "whisper_model",
+          "shape": 7,
+          "type": "WHISPER_ASR",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            32
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-omnivoice-tts",
+        "ver": "bbc483ee74d0222fa8bd8bb35b41fd407806bce1",
+        "Node name for S&R": "OmniVoiceLongformTTS"
+      },
+      "widgets_values": [
+        "OmniVoice",
+        "Good morning everyone,\n\nToday, I want to talk about something simple, yet powerful: progress. Not perfection, not overnight success, but progress—the small steps we take every single day that shape who we become.\n\nWe often live in a world that celebrates big achievements. We see the end results: the awards, the promotions, the victories. But what we don’t always see are the countless hours of effort, the failures, and the moments of doubt that came before them. Progress lives in those unseen moments.\n\nThink about it. Every skill you have today started with a first attempt. Maybe it wasn’t good. Maybe it was uncomfortable. But you kept going. That’s progress.\n\nThe truth is, you don’t need to have everything figured out to move forward. You just need to start. One step. One decision. One action. Over time, those small steps build momentum, and momentum creates change.\n\nThere will be days when progress feels slow. Days when you question whether it’s worth it. In those moments, remember this: growth is not always visible, but it is always happening when you keep trying.\n\nSo don’t be discouraged by how far you have to go. Instead, focus on how far you’ve already come. Celebrate the small wins. Learn from the setbacks. And most importantly, keep moving forward.\n\nBecause in the end, success is not about being perfect. It’s about being persistent.\n\nThank you.",
+        "",
+        32,
+        4,
+        0.1,
+        1,
+        0,
+        "auto",
+        "auto",
+        "auto",
+        42,
+        "fixed",
+        50,
+        5,
+        0,
+        5,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "id": 15,
+      "type": "PreviewAudio",
+      "pos": [
+        749.6061111987731,
+        3527.7148003551883
+      ],
+      "size": [
+        709.8403272145574,
+        99.21707687418439
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 40
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "PreviewAudio"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 16,
+      "type": "PreviewAudio",
+      "pos": [
+        852.0254463726654,
+        4411.273170866452
+      ],
+      "size": [
+        482.0342444635153,
+        90.49264148840757
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 44
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "PreviewAudio"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 30,
+      "type": "OmniVoiceVoiceDesignTTS",
+      "pos": [
+        867.0763054776078,
+        3780.7396811522894
+      ],
+      "size": [
+        444.8850017832374,
+        584.8245520255978
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            44
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "ComfyUI-omnivoice-tts",
+        "ver": "bbc483ee74d0222fa8bd8bb35b41fd407806bce1",
+        "Node name for S&R": "OmniVoiceVoiceDesignTTS"
+      },
+      "widgets_values": [
+        "OmniVoice (auto download)",
+        "Hello! This is a test of voice design with OmniVoice.",
+        "female, low pitch, british accent",
+        32,
+        2,
+        0.1,
+        1,
+        0,
+        "auto",
+        "auto",
+        "auto",
+        0,
+        "randomize",
+        5,
+        0,
+        5,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": 18,
+      "type": "LoadAudio",
+      "pos": [
+        1523.1250863903886,
+        3782.079656245934
+      ],
+      "size": [
+        282.798828125,
+        136
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            41
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "Narrator_USA_deep-voice.wav",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 19,
+      "type": "LoadAudio",
+      "pos": [
+        1526.0223255643773,
+        3964.020789155392
+      ],
+      "size": [
+        282.798828125,
+        136
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            42
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "sample-2.mp3",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 20,
+      "type": "LoadAudio",
+      "pos": [
+        1527.6730771989583,
+        4148.460826019202
+      ],
+      "size": [
+        282.798828125,
+        136
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "Narrator.wav",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 2,
+      "type": "PreviewAudio",
+      "pos": [
+        1537.67454309369,
+        3518.1066708129456
+      ],
+      "size": [
+        728.7278613998612,
+        95.81489456123654
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 32
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "PreviewAudio"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 21,
+      "type": "PreviewAudio",
+      "pos": [
+        1535.6468146869854,
+        4449.48430923473
+      ],
+      "size": [
+        719.9677042397566,
+        88
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 43
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.17.0",
+        "Node name for S&R": "PreviewAudio"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 22,
+      "type": "MarkdownNote",
+      "pos": [
+        -66.90117414092231,
+        2710.444024346558
+      ],
+      "size": [
+        723.0525918801186,
+        1927.4112781923964
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "-",
+      "properties": {},
+      "widgets_values": [
+        "# OmniVoice TTS\n\n  ## Auto-Download\n\n  **Models auto-download on first run** - no manual setup needed!\n\n  | Model | VRAM | Size |\n  |-------|------|------|\n  | OmniVoice (fp32) | ~8-12GB | ~4GB |\n  | OmniVoice-bf16 | ~4-6GB | ~2GB |\n\n  ---\n\n  ## Manual Download\n\n  | File | Size | Link |\n  |------|------|------|\n  | OmniVoice (Full fp32) | ~4GB | [Download](https://huggingface.co/k2-fsa/OmniVoice) |\n  | OmniVoice-bf16 | ~2GB | [Download](https://huggingface.co/drbaph/OmniVoice-bf16) |\n\n\n```\n  📂 ComfyUI/\n  ├── 📂 models/\n  │   ├── 📂 omnivoice/\n  │   │      ├── 📂 OmniVoice/\n  │   │      │      ├── config.json\n  │   │      │      └── model.safetensors\n  │   │      └── 📂 OmniVoice-bf16/\n  │   │             ├── config.json\n  │   │             └── model.safetensors\n  │   └── 📂 audio_encoders/\n  │          ├── 📂 openai_whisper-large-v3-turbo/\n  │          │      ├── config.json\n  │          │      └── model.safetensors\n  │          └── 📂 openai_whisper-medium/\n  │                 ├── config.json\n  │                 └── model.safetensors\n```\n\n  ---\n\n  ## Nodes\n\n  ### OmniVoice Longform TTS\n  Long-form TTS with smart chunking and optional voice cloning. `ref_audio` is optional — leave disconnected for automatic voice.\n\n  ### OmniVoice Voice Clone TTS\n  Clone a voice from reference audio. `ref_audio` is required. No chunking — for long text use Longform TTS.\n\n  ### OmniVoice Voice Design TTS\n  Design synthetic voices from text descriptions. No reference audio needed.\n\n  ### OmniVoice Multi-Speaker TTS\n  Generate dialogue between multiple speakers using `[Speaker_N]:` tags. Dynamic speaker inputs on ComfyUI >= 0.8.1.\n\n  ### OmniVoice Whisper Loader\n  Pre-load Whisper ASR to avoid re-downloading on each run. Connect to any TTS node's `whisper_model` input.\n\n  ---\n\n  ## Generation Parameters\n\n  | Parameter | Default | Range | Description |\n  |-----------|---------|-------|-------------|\n  | steps | 32 | 4-64 | Diffusion steps. 16=faster, 32=balanced, 64=best quality |\n  | guidance_scale | 2.0 | 0-10 | Classifier-free guidance. Higher = more text-aligned |\n  | t_shift | 0.1 | 0-1 | Time-step shift. Smaller = emphasis on earlier steps |\n  | speed | 1.0 | 0.5-2.0 | Speaking speed. >1=faster, <1=slower |\n  | duration | 0.0 | 0-60 | Fixed output duration (seconds). Overrides speed. 0=auto |\n  | position_temperature | 5.0 | 0-20 | Mask-position randomness. 0=greedy, higher=more random |\n  | class_temperature | 0.0 | 0-5 | Token sampling randomness. 0=greedy, higher=more random |\n  | layer_penalty_factor | 5.0 | 0-20 | Penalty on deeper codebook layers |\n  | denoise | True | — | Prepend denoise token for cleaner output |\n  | preprocess_prompt | True | — | Clean reference audio (remove silences, add punctuation) |\n  | postprocess_output | True | — | Remove long silences from generated audio |\n  | keep_model_loaded | True | — | Keep model in memory (offloads to CPU between runs) |\n\n  **Longform TTS only:**\n\n  | Parameter | Default | Range | Description |\n  |-----------|---------|-------|-------------|\n  | words_per_chunk | 100 | 0-500 | Words per chunk. 0=no chunking. Splits at sentence boundaries |\n\n  ---\n\n  ## Whisper ASR models (for auto-transcription)\n\n  | Model | VRAM | Link |\n  |-------|------|------|\n  | whisper-large-v3-turbo | ~1.5GB | [Download](https://huggingface.co/openai/whisper-large-v3-turbo) |\n  | whisper-large-v3 | ~3GB | [Download](https://huggingface.co/openai/whisper-large-v3) |\n  | whisper-medium | ~1.5GB | [Download](https://huggingface.co/openai/whisper-medium) |\n  | whisper-small | ~0.5GB | [Download](https://huggingface.co/openai/whisper-small) |\n  | whisper-tiny | ~0.4GB | [Download](https://huggingface.co/openai/whisper-tiny) |\n\n  ---\n\n  ## Non-verbal expression tags:\n\n  `[laughter]` `[sigh]` `[sniff]` `[question-en]` `[question-ah]` `[question-oh]` `[question-ei]` `[question-yi]` `[surprise-ah]` `[surprise-oh]` `[surprise-wa]` `[surprise-yo]` `[dissatisfaction-hnn]` `[confirmation-en]`\n\n  ---\n\n  ## Voice design attributes (comma-separated):\n\n  | Category | Options |\n  |----------|---------|\n  | Gender | `male`, `female` |\n  | Age | `child`, `young`, `middle-aged`, `elderly` |\n  | Pitch | `very low pitch`, `low pitch`, `medium pitch`, `high pitch`, `very high pitch` |\n  | Style | `whisper` |\n  | English Accents | `american accent`, `british accent`, `australian accent`, `canadian accent`, `indian accent`, `irish accent`, `scottish accent`, `south african accent` |\n  | Chinese Dialects | `四川话`, `陕西话`, `广东话`, `东北话`, `山东话`, `河南话`, `上海话`, `闽南话`, `客家话` |\n\n  **Example:** `female, young, high pitch, british accent, whisper`\n\n  ---\n\n  ## Multi-speaker dialogue format:\n\n  [Speaker_1]: Hello, I'm speaker one.\n  [Speaker_2]: And I'm speaker two!\n  [Speaker_1]: Nice to meet you!\n\n  ---\n\n  ## Links\n\n  - Original [OmniVoice](https://huggingface.co/k2-fsa/OmniVoice)\n  - Models [OmniVoice](https://huggingface.co/k2-fsa/OmniVoice) / [OmniVoice-bf16](https://huggingface.co/drbaph/OmniVoice-bf16)\n  - Paper [arXiv:2604.00688](https://arxiv.org/abs/2604.00688)\n  - Issues [Report Bug](https://github.com/saganaki22/ComfyUI-OmniVoice-TTS/issues)"
+      ],
+      "color": "#c09430",
+      "bgcolor": "rgba(24,24,27,.9)"
+    }
+  ],
+  "links": [
+    [
+      32,
+      26,
+      0,
+      2,
+      0,
+      "AUDIO"
+    ],
+    [
+      33,
+      5,
+      0,
+      26,
+      0,
+      "AUDIO"
+    ],
+    [
+      34,
+      11,
+      0,
+      26,
+      1,
+      "WHISPER_ASR"
+    ],
+    [
+      38,
+      13,
+      0,
+      28,
+      0,
+      "AUDIO"
+    ],
+    [
+      39,
+      14,
+      0,
+      28,
+      1,
+      "WHISPER_ASR"
+    ],
+    [
+      40,
+      28,
+      0,
+      15,
+      0,
+      "AUDIO"
+    ],
+    [
+      41,
+      18,
+      0,
+      29,
+      0,
+      "AUDIO"
+    ],
+    [
+      42,
+      19,
+      0,
+      29,
+      1,
+      "AUDIO"
+    ],
+    [
+      43,
+      29,
+      0,
+      21,
+      0,
+      "AUDIO"
+    ],
+    [
+      44,
+      30,
+      0,
+      16,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Voice Clone",
+      "bounding": [
+        711.8993846369207,
+        2679.8808240882017,
+        776.1213955370494,
+        965.7705864543318
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Longform Clone",
+      "bounding": [
+        1508.7914663102342,
+        2683.3562420791877,
+        785.9196063374911,
+        957.911340119646
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Voice Design",
+      "bounding": [
+        833.2977721911777,
+        3713.803130816895,
+        516.6398808317314,
+        802.4348441785855
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "Multi-Speaker",
+      "bounding": [
+        1513.1250863903886,
+        3708.479656245934,
+        777.5410785503595,
+        849.2245781794468
+      ],
+      "color": "#391466",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.48225360300990205,
+      "offset": [
+        166.9011741409223,
+        -2610.444024346558
+      ]
+    },
+    "frontendVersion": "1.42.8",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
