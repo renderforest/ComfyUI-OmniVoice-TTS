@@ -26,12 +26,24 @@ try:
     import comfy.model_patcher as _cmp
 
     class OmniVoicePatcher(_cmp.ModelPatcher):
-        """ModelPatcher subclass with aimdo dynamic VRAM reporting."""
+        """ModelPatcher subclass used to register OmniVoice with ComfyUI.
+
+        The model is deliberately reported as NON-dynamic.  ComfyUI >= 0.23
+        assumes every patcher whose ``is_dynamic()`` is True is a
+        ``ModelPatcherDynamic`` and reads ``model.dynamic_pins[load_device]``
+        during pin eviction and post-prompt cleanup
+        (``comfy.model_management.models_for_pin_eviction`` /
+        ``cleanup_models_gc``).  This plain ModelPatcher never creates that
+        bookkeeping, so claiming to be dynamic raises
+        ``AttributeError: 'OmniVoice' object has no attribute 'dynamic_pins'``
+        on every TTS run.  OmniVoice manages its own device placement in
+        ``model_cache``, so the classic (non-dynamic) VRAM path is all we need.
+        """
 
         def is_dynamic(self):
-            return True
+            return False
 
-        def _vbar_get(self):
+        def _vbar_get(self, create=False):
             vbars = getattr(self.model, "dynamic_vbars", {})
             if vbars:
                 return next(iter(vbars.values()))
