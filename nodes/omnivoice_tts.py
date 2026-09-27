@@ -477,87 +477,86 @@ class OmniVoiceLongformTTS:
         omnivoice_model, _ = get_or_load_model(
             model, device, dtype, attention, keep_model_loaded
         )
+        result = None
+        try:
+            # Set random seed early so Whisper transcription is also seeded
+            actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
+            manual_seed_all(actual_seed)
 
-        # Set random seed early so Whisper transcription is also seeded
-        actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
-        manual_seed_all(actual_seed)
+            use_voice_clone = ref_audio is not None
 
-        use_voice_clone = ref_audio is not None
+            ref_audio_tensor = None
+            effective_ref_text = ref_text.strip()
+            if use_voice_clone:
+                logger.info("Processing reference audio for voice cloning...")
+                ref_audio_np, _ = comfy_audio_to_numpy(ref_audio, target_sr=OMNIVOICE_SAMPLE_RATE)
+                ref_audio_tensor = torch.from_numpy(ref_audio_np).float()
 
-        ref_audio_tensor = None
-        effective_ref_text = ref_text.strip()
-        if use_voice_clone:
-            logger.info("Processing reference audio for voice cloning...")
-            ref_audio_np, _ = comfy_audio_to_numpy(ref_audio, target_sr=OMNIVOICE_SAMPLE_RATE)
-            ref_audio_tensor = torch.from_numpy(ref_audio_np).float()
-
-            ref_duration = len(ref_audio_np) / OMNIVOICE_SAMPLE_RATE
-            if ref_duration < 1:
-                logger.warning(
-                    f"Reference audio is only {ref_duration:.1f}s — "
-                    "recommend 3-15s for best quality."
-                )
-            elif ref_duration > 30:
-                logger.warning(
-                    f"Reference audio is {ref_duration:.1f}s — "
-                    "longer than recommended 15s may cause issues."
-                )
-
-            if not effective_ref_text and whisper_model is not None:
-                whisper_pipe = get_or_cache_whisper(whisper_model, model, device, dtype)
-                if whisper_pipe is not None:
-                    logger.info("Using pre-loaded Whisper ASR for voice transcription")
-                    effective_ref_text = transcribe_with_whisper(
-                        whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                ref_duration = len(ref_audio_np) / OMNIVOICE_SAMPLE_RATE
+                if ref_duration < 1:
+                    logger.warning(
+                        f"Reference audio is only {ref_duration:.1f}s — "
+                        "recommend 3-15s for best quality."
                     )
-                    offload_whisper_to_cpu()
-            elif not effective_ref_text:
-                # Check for locally downloaded Whisper before letting OmniVoice download
-                local_name = find_local_whisper_model()
-                if local_name is not None:
-                    logger.info(
-                        f"No ref_text — auto-detected local Whisper "
-                        f"({local_name}) for transcription"
+                elif ref_duration > 30:
+                    logger.warning(
+                        f"Reference audio is {ref_duration:.1f}s — "
+                        "longer than recommended 15s may cause issues."
                     )
-                    try:
-                        pipe = load_whisper_pipeline(local_name, device, dtype)
-                        get_or_cache_whisper(
-                            {"pipeline": pipe, "model_name": local_name},
-                            model, device, dtype,
-                        )
+
+                if not effective_ref_text and whisper_model is not None:
+                    whisper_pipe = get_or_cache_whisper(whisper_model, model, device, dtype)
+                    if whisper_pipe is not None:
+                        logger.info("Using pre-loaded Whisper ASR for voice transcription")
                         effective_ref_text = transcribe_with_whisper(
-                            pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                            whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
                         )
                         offload_whisper_to_cpu()
-                    except Exception as e:
-                        logger.warning(f"Failed to load local Whisper: {e}")
+                elif not effective_ref_text:
+                    # Check for locally downloaded Whisper before letting OmniVoice download
+                    local_name = find_local_whisper_model()
+                    if local_name is not None:
+                        logger.info(
+                            f"No ref_text — auto-detected local Whisper "
+                            f"({local_name}) for transcription"
+                        )
+                        try:
+                            pipe = load_whisper_pipeline(local_name, device, dtype)
+                            get_or_cache_whisper(
+                                {"pipeline": pipe, "model_name": local_name},
+                                model, device, dtype,
+                            )
+                            effective_ref_text = transcribe_with_whisper(
+                                pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                            )
+                            offload_whisper_to_cpu()
+                        except Exception as e:
+                            logger.warning(f"Failed to load local Whisper: {e}")
+                            logger.info("No ref_text — Whisper will auto-transcribe (downloads if not cached)")
+                    else:
                         logger.info("No ref_text — Whisper will auto-transcribe (downloads if not cached)")
-                else:
-                    logger.info("No ref_text — Whisper will auto-transcribe (downloads if not cached)")
 
-        chunks = _smart_chunk_text(text, words_per_chunk)
+            chunks = _smart_chunk_text(text, words_per_chunk)
 
-        if len(chunks) > 1:
-            logger.info(f"Long text detected — splitting into {len(chunks)} chunks at sentence boundaries")
+            if len(chunks) > 1:
+                logger.info(f"Long text detected — splitting into {len(chunks)} chunks at sentence boundaries")
 
-        total_chunks = len(chunks)
-        pbar = ProgressBar(total_chunks + 1) if _PBAR else None
+            total_chunks = len(chunks)
+            pbar = ProgressBar(total_chunks + 1) if _PBAR else None
 
-        preview = text[:80] + "..." if len(text) > 80 else text
-        mode = "voice clone" if use_voice_clone else "auto voice"
-        logger.info(f"Longform TTS ({mode}): {preview}")
+            preview = text[:80] + "..." if len(text) > 80 else text
+            mode = "voice clone" if use_voice_clone else "auto voice"
+            logger.info(f"Longform TTS ({mode}): {preview}")
 
-        if pbar:
-            pbar.update_absolute(1, total_chunks + 1)
+            if pbar:
+                pbar.update_absolute(1, total_chunks + 1)
 
-        self._check_interrupt()
+            self._check_interrupt()
 
-        audio_chunks = []
-        result = None
-        auto_ref_audio_tensor = None
-        first_chunk_text = ""
+            audio_chunks = []
+            auto_ref_audio_tensor = None
+            first_chunk_text = ""
 
-        try:
             for chunk_idx, chunk_text in enumerate(chunks):
                 self._check_interrupt()
 

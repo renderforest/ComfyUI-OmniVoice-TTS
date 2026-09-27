@@ -371,54 +371,53 @@ if _V3:
             omnivoice_model, _ = get_or_load_model(
                 model, device, dtype, attention, keep_model_loaded
             )
+            result = None
+            try:
+                # Parse dialogue
+                dialogue_lines = _parse_dialogue_lines(text)
+                if not dialogue_lines:
+                    raise ValueError(
+                        "No speaker lines found. Use [Speaker_N]: text format"
+                    )
 
-            # Parse dialogue
-            dialogue_lines = _parse_dialogue_lines(text)
-            if not dialogue_lines:
-                raise ValueError(
-                    "No speaker lines found. Use [Speaker_N]: text format"
+                logger.info(
+                    f"Multi-Speaker TTS ({n} speakers, {len(dialogue_lines)} lines)"
                 )
 
-            logger.info(
-                f"Multi-Speaker TTS ({n} speakers, {len(dialogue_lines)} lines)"
-            )
+                # Auto-detect local Whisper if any speaker needs transcription
+                any_without_ref = any(
+                    not num_speakers.get(f"speaker_{i + 1}_ref_text", "").strip()
+                    for i in range(n)
+                )
+                auto_whisper_pipe = None
+                if any_without_ref:
+                    auto_whisper_pipe = _auto_load_whisper(model, device, dtype)
+                auto_ref_texts = {}
+                if auto_whisper_pipe is not None:
+                    for i in range(n):
+                        if num_speakers.get(f"speaker_{i + 1}_ref_text", "").strip():
+                            continue
+                        speaker_audio = num_speakers.get(f"speaker_{i + 1}_audio")
+                        if speaker_audio is None:
+                            continue
+                        ref_audio_np, _ = comfy_audio_to_numpy(
+                            speaker_audio,
+                            target_sr=OMNIVOICE_SAMPLE_RATE
+                        )
+                        auto_ref_texts[i + 1] = transcribe_with_whisper(
+                            auto_whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                        )
+                    offload_whisper_to_cpu()
 
-            # Auto-detect local Whisper if any speaker needs transcription
-            any_without_ref = any(
-                not num_speakers.get(f"speaker_{i + 1}_ref_text", "").strip()
-                for i in range(n)
-            )
-            auto_whisper_pipe = None
-            if any_without_ref:
-                auto_whisper_pipe = _auto_load_whisper(model, device, dtype)
-            auto_ref_texts = {}
-            if auto_whisper_pipe is not None:
-                for i in range(n):
-                    if num_speakers.get(f"speaker_{i + 1}_ref_text", "").strip():
-                        continue
-                    speaker_audio = num_speakers.get(f"speaker_{i + 1}_audio")
-                    if speaker_audio is None:
-                        continue
-                    ref_audio_np, _ = comfy_audio_to_numpy(
-                        speaker_audio,
-                        target_sr=OMNIVOICE_SAMPLE_RATE
-                    )
-                    auto_ref_texts[i + 1] = transcribe_with_whisper(
-                        auto_whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
-                    )
-                offload_whisper_to_cpu()
+                # Set random seed
+                actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
+                manual_seed_all(actual_seed)
 
-            # Set random seed
-            actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
-            manual_seed_all(actual_seed)
+                total_steps = len(dialogue_lines) + 1
+                pbar = ProgressBar(total_steps) if _PBAR else None
+                audio_turns = []
+                sample_rate = OMNIVOICE_SAMPLE_RATE
 
-            total_steps = len(dialogue_lines) + 1
-            pbar = ProgressBar(total_steps) if _PBAR else None
-            audio_turns = []
-            sample_rate = OMNIVOICE_SAMPLE_RATE
-            result = None
-
-            try:
                 for line_idx, (speaker_idx, line_text) in enumerate(dialogue_lines):
                     cls._check_interrupt()
 
@@ -706,66 +705,65 @@ else:
             omnivoice_model, _ = get_or_load_model(
                 model, device, dtype, attention, keep_model_loaded
             )
+            result = None
+            try:
+                # Parse dialogue
+                dialogue_lines = _parse_dialogue_lines(text)
+                if not dialogue_lines:
+                    raise ValueError(
+                        "No speaker lines found. Use [Speaker_N]: text format"
+                    )
 
-            # Parse dialogue
-            dialogue_lines = _parse_dialogue_lines(text)
-            if not dialogue_lines:
-                raise ValueError(
-                    "No speaker lines found. Use [Speaker_N]: text format"
+                logger.info(
+                    f"Multi-Speaker TTS ({num_speakers} speakers, {len(dialogue_lines)} lines)"
                 )
 
-            logger.info(
-                f"Multi-Speaker TTS ({num_speakers} speakers, {len(dialogue_lines)} lines)"
-            )
+                # Auto-detect local Whisper if no Whisper node is connected
+                # and any speaker needs auto-transcription
+                any_without_ref = any(
+                    not kwargs.get(f"speaker_{i}_ref_text", "").strip()
+                    for i in range(1, num_speakers + 1)
+                )
+                auto_whisper_pipe = None
+                if any_without_ref and whisper_model is None:
+                    auto_whisper_pipe = _auto_load_whisper(model, device, dtype)
 
-            # Auto-detect local Whisper if no Whisper node is connected
-            # and any speaker needs auto-transcription
-            any_without_ref = any(
-                not kwargs.get(f"speaker_{i}_ref_text", "").strip()
-                for i in range(1, num_speakers + 1)
-            )
-            auto_whisper_pipe = None
-            if any_without_ref and whisper_model is None:
-                auto_whisper_pipe = _auto_load_whisper(model, device, dtype)
+                auto_ref_texts = {}
+                if any_without_ref:
+                    whisper_pipe = None
+                    if whisper_model is not None:
+                        whisper_pipe = get_or_cache_whisper(whisper_model, model, device, dtype)
+                    elif auto_whisper_pipe is not None:
+                        whisper_pipe = auto_whisper_pipe
 
-            auto_ref_texts = {}
-            if any_without_ref:
-                whisper_pipe = None
-                if whisper_model is not None:
-                    whisper_pipe = get_or_cache_whisper(whisper_model, model, device, dtype)
-                elif auto_whisper_pipe is not None:
-                    whisper_pipe = auto_whisper_pipe
+                    if whisper_pipe is not None:
+                        for i in range(1, num_speakers + 1):
+                            if kwargs.get(f"speaker_{i}_ref_text", "").strip():
+                                continue
+                            speaker_audio = kwargs.get(f"speaker_{i}_audio")
+                            if speaker_audio is None:
+                                continue
+                            ref_audio_np, _ = comfy_audio_to_numpy(
+                                speaker_audio,
+                                target_sr=OMNIVOICE_SAMPLE_RATE
+                            )
+                            auto_ref_texts[i] = transcribe_with_whisper(
+                                whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                            )
+                        offload_whisper_to_cpu()
 
-                if whisper_pipe is not None:
-                    for i in range(1, num_speakers + 1):
-                        if kwargs.get(f"speaker_{i}_ref_text", "").strip():
-                            continue
-                        speaker_audio = kwargs.get(f"speaker_{i}_audio")
-                        if speaker_audio is None:
-                            continue
-                        ref_audio_np, _ = comfy_audio_to_numpy(
-                            speaker_audio,
-                            target_sr=OMNIVOICE_SAMPLE_RATE
-                        )
-                        auto_ref_texts[i] = transcribe_with_whisper(
-                            whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
-                        )
-                    offload_whisper_to_cpu()
+                # Set random seed
+                actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
+                manual_seed_all(actual_seed)
 
-            # Set random seed
-            actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
-            manual_seed_all(actual_seed)
+                total_steps = len(dialogue_lines) + 1
+                pbar = ProgressBar(total_steps) if _PBAR else None
+                audio_turns = []
+                sample_rate = OMNIVOICE_SAMPLE_RATE
 
-            total_steps = len(dialogue_lines) + 1
-            pbar = ProgressBar(total_steps) if _PBAR else None
-            audio_turns = []
-            sample_rate = OMNIVOICE_SAMPLE_RATE
+                # Track which speakers used up-front Whisper transcription.
+                speakers_need_whisper = set(auto_ref_texts)
 
-            # Track which speakers used up-front Whisper transcription.
-            speakers_need_whisper = set(auto_ref_texts)
-            result = None
-
-            try:
                 for line_idx, (speaker_idx, line_text) in enumerate(dialogue_lines):
                     self._check_interrupt()
 
