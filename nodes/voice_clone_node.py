@@ -329,79 +329,78 @@ class OmniVoiceVoiceCloneTTS:
         omnivoice_model, _ = get_or_load_model(
             model, device, dtype, attention, keep_model_loaded
         )
-
-        pbar = ProgressBar(4) if _PBAR else None
-
-        # Convert reference audio from ComfyUI format to numpy at 24kHz
-        logger.info("Processing reference audio...")
-        ref_audio_np, ref_sr = comfy_audio_to_numpy(ref_audio, target_sr=OMNIVOICE_SAMPLE_RATE)
-        ref_audio_tensor = torch.from_numpy(ref_audio_np).float()
-        ref_duration = len(ref_audio_np) / OMNIVOICE_SAMPLE_RATE
-        effective_ref_text = ref_text.strip()
-
-        # Warn about reference audio length
-        if ref_duration < 1:
-            logger.warning(
-                f"Reference audio is only {ref_duration:.1f}s — "
-                "recommend 3-15s for best quality."
-            )
-        elif ref_duration > 30:
-            logger.warning(
-                f"Reference audio is {ref_duration:.1f}s — "
-                "longer than recommended 15s may cause issues."
-            )
-
-        if pbar:
-            pbar.update_absolute(1, 4)
-
-        # Log what we're generating
-        logger.info(f"Voice Clone TTS: {text[:80]}{'...' if len(text) > 80 else ''}")
-        if effective_ref_text:
-            logger.info(f"Reference transcript provided — bypassing Whisper ASR")
-        elif whisper_model is not None:
-            whisper_pipe = get_or_cache_whisper(whisper_model, model, device, dtype)
-            if whisper_pipe is not None:
-                logger.info("No reference transcript — using pre-loaded Whisper ASR")
-                effective_ref_text = transcribe_with_whisper(
-                    whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
-                )
-                offload_whisper_to_cpu()
-        else:
-            # No Whisper node connected — check for a locally downloaded model
-            # before letting OmniVoice trigger its own download
-            local_name = find_local_whisper_model()
-            if local_name is not None:
-                logger.info(
-                    f"No reference transcript — auto-detected local Whisper "
-                    f"({local_name}) for transcription"
-                )
-                try:
-                    pipe = load_whisper_pipeline(local_name, device, dtype)
-                    get_or_cache_whisper(
-                        {"pipeline": pipe, "model_name": local_name},
-                        model, device, dtype,
-                    )
-                    effective_ref_text = transcribe_with_whisper(
-                        pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
-                    )
-                    offload_whisper_to_cpu()
-                except Exception as e:
-                    logger.warning(f"Failed to load local Whisper: {e}")
-                    logger.info("No reference transcript — Whisper will auto-transcribe (will download if not cached)")
-            else:
-                logger.info("No reference transcript — Whisper will auto-transcribe (will download if not cached)")
-
-        # Set random seed
-        actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
-        manual_seed_all(actual_seed)
-
-        if pbar:
-            pbar.update_absolute(2, 4)
-
-        self._check_interrupt()
-
         result = None
         try:
+            pbar = ProgressBar(4) if _PBAR else None
+
+            # Convert reference audio from ComfyUI format to numpy at 24kHz
+            logger.info("Processing reference audio...")
+            ref_audio_np, ref_sr = comfy_audio_to_numpy(ref_audio, target_sr=OMNIVOICE_SAMPLE_RATE)
+            ref_audio_tensor = torch.from_numpy(ref_audio_np).float()
+            ref_duration = len(ref_audio_np) / OMNIVOICE_SAMPLE_RATE
+            effective_ref_text = ref_text.strip()
+
+            # Warn about reference audio length
+            if ref_duration < 1:
+                logger.warning(
+                    f"Reference audio is only {ref_duration:.1f}s — "
+                    "recommend 3-15s for best quality."
+                )
+            elif ref_duration > 30:
+                logger.warning(
+                    f"Reference audio is {ref_duration:.1f}s — "
+                    "longer than recommended 15s may cause issues."
+                )
+
+            if pbar:
+                pbar.update_absolute(1, 4)
+
+            # Log what we're generating
+            logger.info(f"Voice Clone TTS: {text[:80]}{'...' if len(text) > 80 else ''}")
+            if effective_ref_text:
+                logger.info(f"Reference transcript provided — bypassing Whisper ASR")
+            elif whisper_model is not None:
+                whisper_pipe = get_or_cache_whisper(whisper_model, model, device, dtype)
+                if whisper_pipe is not None:
+                    logger.info("No reference transcript — using pre-loaded Whisper ASR")
+                    effective_ref_text = transcribe_with_whisper(
+                        whisper_pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                    )
+                    offload_whisper_to_cpu()
+            else:
+                # No Whisper node connected — check for a locally downloaded model
+                # before letting OmniVoice trigger its own download
+                local_name = find_local_whisper_model()
+                if local_name is not None:
+                    logger.info(
+                        f"No reference transcript — auto-detected local Whisper "
+                        f"({local_name}) for transcription"
+                    )
+                    try:
+                        pipe = load_whisper_pipeline(local_name, device, dtype)
+                        get_or_cache_whisper(
+                            {"pipeline": pipe, "model_name": local_name},
+                            model, device, dtype,
+                        )
+                        effective_ref_text = transcribe_with_whisper(
+                            pipe, ref_audio_np, OMNIVOICE_SAMPLE_RATE
+                        )
+                        offload_whisper_to_cpu()
+                    except Exception as e:
+                        logger.warning(f"Failed to load local Whisper: {e}")
+                        logger.info("No reference transcript — Whisper will auto-transcribe (will download if not cached)")
+                else:
+                    logger.info("No reference transcript — Whisper will auto-transcribe (will download if not cached)")
+
+            # Set random seed
+            actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
+            manual_seed_all(actual_seed)
+
+            if pbar:
+                pbar.update_absolute(2, 4)
+
+            self._check_interrupt()
+
             gen_kwargs = {
                 "text": text,
                 "num_step": steps,

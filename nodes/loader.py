@@ -26,12 +26,24 @@ try:
     import comfy.model_patcher as _cmp
 
     class OmniVoicePatcher(_cmp.ModelPatcher):
-        """ModelPatcher subclass with aimdo dynamic VRAM reporting."""
+        """ModelPatcher subclass used to register OmniVoice with ComfyUI.
+
+        The model is deliberately reported as NON-dynamic.  ComfyUI >= 0.23
+        assumes every patcher whose ``is_dynamic()`` is True is a
+        ``ModelPatcherDynamic`` and reads ``model.dynamic_pins[load_device]``
+        during pin eviction and post-prompt cleanup
+        (``comfy.model_management.models_for_pin_eviction`` /
+        ``cleanup_models_gc``).  This plain ModelPatcher never creates that
+        bookkeeping, so claiming to be dynamic raises
+        ``AttributeError: 'OmniVoice' object has no attribute 'dynamic_pins'``
+        on every TTS run.  OmniVoice manages its own device placement in
+        ``model_cache``, so the classic (non-dynamic) VRAM path is all we need.
+        """
 
         def is_dynamic(self):
-            return True
+            return False
 
-        def _vbar_get(self):
+        def _vbar_get(self, create=False):
             vbars = getattr(self.model, "dynamic_vbars", {})
             if vbars:
                 return next(iter(vbars.values()))
@@ -353,9 +365,18 @@ def comfy_audio_to_numpy(audio_dict: dict, target_sr: Optional[int] = None) -> T
     return audio_np, source_sr
 
 
+# transformers' Whisper generate() refuses clips over 30 s (3000 mel frames)
+# unless long-form generation is enabled via return_timestamps=True.
+WHISPER_SHORTFORM_MAX_SECONDS = 30
+
+
 def transcribe_with_whisper(pipe, audio_np: np.ndarray, sample_rate: int) -> str:
     """Transcribe in-memory audio with a HuggingFace ASR pipeline."""
-    result = pipe({"array": audio_np.astype(np.float32, copy=False), "sampling_rate": sample_rate})
+    audio = audio_np.astype(np.float32, copy=False)
+    kwargs = {}
+    if len(audio) > WHISPER_SHORTFORM_MAX_SECONDS * sample_rate:
+        kwargs["return_timestamps"] = True
+    result = pipe({"array": audio, "sampling_rate": sample_rate}, **kwargs)
     if isinstance(result, dict):
         return str(result.get("text", "")).strip()
     return str(result).strip()

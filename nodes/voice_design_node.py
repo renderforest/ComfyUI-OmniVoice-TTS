@@ -283,24 +283,23 @@ class OmniVoiceVoiceDesignTTS:
         omnivoice_model, _ = get_or_load_model(
             model, device, dtype, attention, keep_model_loaded
         )
-
-        pbar = ProgressBar(3) if _PBAR else None
-
-        # Log what we're generating
-        logger.info(f"Voice Design TTS: {text[:80]}{'...' if len(text) > 80 else ''}")
-        logger.info(f"Voice attributes: {voice_instruct}")
-
-        if pbar:
-            pbar.update_absolute(1, 3)
-
-        # Set random seed
-        actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
-        manual_seed_all(actual_seed)
-
-        self._check_interrupt()
-
         result = None
         try:
+            pbar = ProgressBar(3) if _PBAR else None
+
+            # Log what we're generating
+            logger.info(f"Voice Design TTS: {text[:80]}{'...' if len(text) > 80 else ''}")
+            logger.info(f"Voice attributes: {voice_instruct}")
+
+            if pbar:
+                pbar.update_absolute(1, 3)
+
+            # Set random seed
+            actual_seed = seed if seed != 0 else torch.randint(0, 2**31, (1,)).item()
+            manual_seed_all(actual_seed)
+
+            self._check_interrupt()
+
             # Build kwargs for generate
             gen_kwargs = {
                 "text": text,
