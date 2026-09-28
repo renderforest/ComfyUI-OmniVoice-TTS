@@ -365,9 +365,18 @@ def comfy_audio_to_numpy(audio_dict: dict, target_sr: Optional[int] = None) -> T
     return audio_np, source_sr
 
 
+# transformers' Whisper generate() refuses clips over 30 s (3000 mel frames)
+# unless long-form generation is enabled via return_timestamps=True.
+WHISPER_SHORTFORM_MAX_SECONDS = 30
+
+
 def transcribe_with_whisper(pipe, audio_np: np.ndarray, sample_rate: int) -> str:
     """Transcribe in-memory audio with a HuggingFace ASR pipeline."""
-    result = pipe({"array": audio_np.astype(np.float32, copy=False), "sampling_rate": sample_rate})
+    audio = audio_np.astype(np.float32, copy=False)
+    kwargs = {}
+    if len(audio) > WHISPER_SHORTFORM_MAX_SECONDS * sample_rate:
+        kwargs["return_timestamps"] = True
+    result = pipe({"array": audio, "sampling_rate": sample_rate}, **kwargs)
     if isinstance(result, dict):
         return str(result.get("text", "")).strip()
     return str(result).strip()
